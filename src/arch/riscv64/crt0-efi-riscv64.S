@@ -152,15 +152,15 @@ _start:
 	sd			ra, 16(sp)
 
 	/* Run relocation */
-	lla			a0, ImageBase
-	lla			a1, _DYNAMIC
-	call		_relocate
-	bne			a0, zero, 0f
+	// lla			a0, ImageBase
+	// lla			a1, _DYNAMIC
+	// call		_relocate
+	// bne			a0, zero, 0f
 
 	/* Call EFI code */
 	ld			a1, 8(sp)
 	ld			a0, 0(sp)
-	call		efi_main
+	call	    efi_main
 
 	ld			ra, 16(sp)
 
