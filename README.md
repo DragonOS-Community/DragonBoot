@@ -6,7 +6,7 @@ A stage2 UEFI bootloader of DragonOS in pure Rust.
 
 ## 功能
 
-- [ ] 从UEFI启动DragonBoot
+- [x] 从UEFI启动DragonBoot
 - [ ] 显示启动菜单
 - [ ] 从磁盘启动DragonOS
 - [ ] 启动配置
