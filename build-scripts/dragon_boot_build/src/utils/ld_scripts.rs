@@ -8,9 +8,8 @@ pub fn setup() {
             CargoHandler::emit_link_arg("-Tsrc/arch/riscv64/link.ld");
             CargoHandler::emit_link_arg("--emit-relocs");
             CargoHandler::emit_link_arg("--nmagic");
-            
+
             CargoHandler::emit_link_arg("--no-relax");
-            
         }
         _ => panic!("Unsupported arch: {:?}", arch),
     }

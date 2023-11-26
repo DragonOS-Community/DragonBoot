@@ -69,16 +69,14 @@ fn rs_efi_main(
     // Code: 0000 0000 0000 0000 0000 0000 0000 0000 (0000)
     // UEFI image [0x000000009deec000:0x000000009def0f6f] '/efi\boot\bootriscv64.efi
     // ```
-    // 
+    //
     // Fault的PC和值都是错误的，因此猜想动态分发这块的代码不是PIC的，需要重定位，因此不能在重定位之前用println
-    
 
     loop {}
     // 执行下面这行会出错，就是上面注释说的那个错误
     system_table.stdout().write_fmt(args);
     // system_table.stdout().write_str(args);
 
-   
     loop {}
     return Ok(());
 }
