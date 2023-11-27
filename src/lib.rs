@@ -7,6 +7,7 @@ use core::{
     fmt::{Formatter, Write},
 };
 extern crate alloc;
+extern crate elf;
 
 use alloc::string::String;
 use log::info;
