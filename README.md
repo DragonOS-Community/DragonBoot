@@ -23,6 +23,8 @@
 - go: 1.24.6 amd64
 - Linux kernel(for kexec): 6.15.4
 
+> 目前提供已经构建好的 initram 文件，见仓库 `release` 部分。
+
 ## 项目使用流程
 
 ### 基本运行环境
@@ -104,13 +106,17 @@ xz --check=crc32 --lzma2=dict=512KiB /tmp/initramfs.linux_amd64.cpio
 
 确保你能够构建并运行 x86 架构的 DragonOS, 详细过程见对应仓库.
 
+> 请注意查看[项目目前存在的 BUG 与暂时性的补丁中 DragonOS 的更改](#内核-DragonOS)，对 DragonOS 源码做一定的更改。
+
 首先打开内核的配置, 在 cargo.toml 中启用 `initram` 的 feature(可以把他加到 default 中).
 
-随后将刚刚的压缩文件移到 `DragonOS/kernel/initram` 目录下, 并使用架构重命名:
+随后需要在根目录的 `env.mk` 中配置 initram 文件路径(刚刚的压缩文件, 位于 `/tmp/initramfs.linux_amd64.cpio.xz`):
 
-```bash
-cp /tmp/initramfs.linux_amd64.cpio.xz ~/DragonOS/kernel/initram/x86.cpio.xz
+```makefile
+export INITRAM_PATH?=$(ROOT_PATH)/x86.cpio.xz
 ```
+
+默认路径为根目录下。
 
 此时即可使用 `make build` 构建内核.
 
@@ -154,3 +160,36 @@ libinit.NetInit()
 ```
 
 在 58 行注释掉 `libinit.SetEnv()` 和 `libinit.CreateRootfs()`。
+
+### 内核 DragonOS
+
+目前内核因多线程等问题尚存bug，需要暂时性的修改内核以规避此问题。
+
+```rust
+// kernel/src/net/socket/inode.rs
+// 注释掉 self.epoll_items().add(epitem);
+fn add_epitem(
+    &self,
+    epitem: Arc<crate::filesystem::epoll::EPollItem>,
+    _: &FilePrivateData,
+) -> Result<(), SystemError> {
+    //self.epoll_items().add(epitem);
+    return Ok(());
+}
+```
+
+```rust
+// kernel/src/mm/ucontext.rs
+// 注释掉 assert!(self.conflicts(region).next().is_none());
+
+/// 在当前进程的映射关系中，插入一个新的VMA。
+pub fn insert_vma(&mut self, vma: Arc<LockedVMA>) {
+    let region = vma.lock_irqsave().region;
+    // 要求插入的地址范围必须是空闲的，也就是说，当前进程的地址空间中，不能有任何与之重叠的VMA。
+    //assert!(self.conflicts(region).next().is_none());
+    self.reserve_hole(&region);
+
+    self.vmas.insert(vma);
+}
+```
+
